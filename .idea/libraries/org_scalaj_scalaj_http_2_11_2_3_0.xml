@@ -3,10 +3,12 @@
     <properties maven-id="org.scalaj:scalaj-http_2.11:2.3.0" />
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/scalaj-http_2.11-2.3.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/scala-library-2.11.7.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://$USER_HOME$/.ideaLibSources/scalaj-http_2.11-2.3.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/scalaj-http_2.11-2.3.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/scala-library-2.11.7-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

@@ -20,13 +20,14 @@ abstract class ZeppelinAction extends AnAction with IdeaDocumentApi {
 
   private def precedingLines(editor: Editor): immutable.Seq[(Int, String)] = {
     val currentLine = editor.getCaretModel.getLogicalPosition.line
-    Range(currentLine, 1, -1).map { line =>
-      val start = editor.getDocument.getLineStartOffset(line - 1)
-      val end = editor.getDocument.getLineStartOffset(line)
+    Range(currentLine, 0, -1).inclusive.map { line =>
+      val start = editor.getDocument.getLineStartOffset(line)
+      val end = editor.getDocument.getLineEndOffset(line)
       (line, editor.getDocument.getCharsSequence.subSequence(start, end).toString)
     }.map(x => x.copy(_2 = x._2.stripLineEnd))
   }
 
+  /*
   def findNote(editor: Editor, line: Int): Option[Notebook] = {
     val currentLine = editor.getCaretModel.getLogicalPosition.line
     val linesInReverse = Range(currentLine, 1, -1).map { line =>
@@ -37,6 +38,7 @@ abstract class ZeppelinAction extends AnAction with IdeaDocumentApi {
 
     linesInReverse.flatMap(Notebook.parse).headOption
   }
+  */
 
   protected def runWriteAction(anActionEvent: AnActionEvent)(f: Document => Unit): Unit = ApplicationManager.getApplication.runWriteAction{
     val document = currentDocument(currentFileIn(anActionEvent.getProject))

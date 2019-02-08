@@ -45,19 +45,27 @@
         <add-to-group group-id="ToolsMenu" anchor="first"/>
         <action id="intellij.zeppelin.ZeppelinNewNoteAction" class="intellij.zeppelin.ZeppelinNewNoteAction"
                 text="New Zeppelin Notebook" description="Create new Zeppelin notebook">
+          <!--
           <keyboard-shortcut first-keystroke="control alt shift ENTER" keymap="$default"/>
+          -->
         </action>
         <action id="intellij.zeppelin.ZeppelinAddParagraph" class="intellij.zeppelin.ZeppelinAddParagraph"
                 text="Add Zeppelin paragraph" description="Run selected code as new Zeppelin paragraph">
+          <!--
           <keyboard-shortcut first-keystroke="alt shift ENTER" keymap="$default"/>
+          -->
         </action>
         <action id="intellij.zeppelin.ZeppelinRunParagraph" class="intellij.zeppelin.ZeppelinRunParagraph"
                 text="Run Zeppelin paragraph" description="Run selected code in an existing Zeppelin paragraph">
+          <!--
           <keyboard-shortcut first-keystroke="shift ENTER" keymap="$default"/>
+          -->
         </action>
         <action id="intellij.zeppelin.ZeppelinDeleteParagraph" class="intellij.zeppelin.ZeppelinDeleteParagraph"
                 text="Delete Zeppelin paragraph" description="Delete current Zeppelin paragraph">
+          <!--
           <keyboard-shortcut first-keystroke="alt shift BACKSPACE" keymap="$default"/>
+          -->
         </action>
       </group>
 

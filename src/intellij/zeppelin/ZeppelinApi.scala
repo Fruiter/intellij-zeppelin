@@ -1,19 +1,53 @@
 package intellij.zeppelin
 
-import java.net.HttpCookie
+import java.net.{HttpCookie, InetSocketAddress}
 
+import scalaj.http.Http
 import spray.json.{JsString, _}
 
 import scala.util.matching.Regex
 import scala.util.{Failure, Success, Try}
-import scalaj.http.Http
 
-case class Notebook(id:String, size:Int) {
+case class Url(url: String, noteId: Option[String])
+
+object Url {
+  private val patternPartial = raw""".*?//-\s*?(http.*?://.*?/)""".r
+  private val patternFull = raw""".*?//-\s*?(http.*?://.*?)/#/notebook/([A-Z0-9]+)""".r
+  def parse(text:String): Option[Url] = text match {
+    case patternFull(url, noteId) => Some(Url(url, Some(noteId)))
+    case patternPartial(url) => Some(Url(url, None))
+    case _ => None
+  }
+}
+
+object Credentials {
+  private val pattern = raw""".*?//-\s*?creds:(.*?),(.*?).*""".r
+  def parse(text:String): Option[Credentials] = text match {
+    case pattern(username, password) => Some(Credentials(username, password))
+    case _ => None
+  }
+}
+
+case class Proxy(host: String = "localhost", port: Int)
+
+object Proxy {
+  private val patternFull = raw""".*?//-\s*?proxy:(.*?):([0-9]*?).*""".r
+  private val patternPartial = raw""".*?//-\s*?proxy:([0-9]*?).*""".r
+  def parse(text:String): Option[Proxy] = text match {
+    case patternFull(host, port) => Some(Proxy(host, port.toInt))
+    case patternPartial(port) => Some(Proxy(port = port.toInt))
+    case _ => None
+  }
+}
+
+case class Notebook(id:String, size:Int = 0) {
   def notebookHeader(url:String):String = Seq(markerText, s"//$url/#/notebook/$id").mkString("\n")
   def markerText:String = s"//Notebook:$id,$size"
 }
-case class Paragraph(id:String, index:Int) {
-  def markerText:String = s"//Paragraph:$id,$index"
+
+case class Paragraph(id:String, index:Int = 0) {
+  // def markerText:String = s"//Paragraph:$id,$index"
+  def markerText:String = s"//-$id"
 }
 
 case class ParagraphResult(paragraph: Paragraph, results:Seq[String]) {
@@ -32,18 +66,30 @@ object Notebook {
 
 object Paragraph{
   private val ParagraphId: Regex = """.*//Paragraph:([\w_-]+),(\d+).*""".r
+  private val patternFull = raw""".*?//-\s*?(\d{8}-\d{6}_\d+).*""".r
+  private val patternPartial = raw""".*?//-\s*""".r
   def parse(text:String):Option[Paragraph] = text match {
     case ParagraphId(id, size) => Some(Paragraph(id, size.toInt))
+    case patternFull(id) => Some(Paragraph(id))
+    case patternPartial(id) => Some(Paragraph(null))
     case _ => None
   }
 
 }
 case class Credentials(username:String, password:String)
 
-class ZeppelinApi(val url:String, credentials:Option[Credentials]){
+class ZeppelinApi(val url:String, credentials:Option[Credentials], proxy:Option[Proxy]){
+  private[this] def buildReq(url:String) = {
+    val h = Http(url)
+    proxy match {
+      case None => h
+      case Some(p) =>
+        h.proxy(new java.net.Proxy(java.net.Proxy.Type.SOCKS, new InetSocketAddress(p.host, p.port)))
+    }
+  }
 
   lazy val sessionToken: Option[HttpCookie] = credentials.flatMap { c =>
-    val r = Http(s"$url/api/login").postForm(Seq(
+    val r = buildReq(s"$url/api/login").postForm(Seq(
       ("username", c.username),
       ("password", c.password)
     ))
@@ -65,7 +111,7 @@ class ZeppelinApi(val url:String, credentials:Option[Credentials]){
   }
 
   private def request(path:String) = {
-    val r = Http(s"$url$path")
+    val r = buildReq(s"$url$path")
     sessionToken.fold(r)(cookie => r.header("Cookie", s"${cookie.getName}=${cookie.getValue}"))
   }
 

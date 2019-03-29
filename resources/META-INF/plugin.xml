@@ -37,6 +37,11 @@
     <projectConfigurable groupId="language"  instance="intellij.zeppelin.ZeppelinConfigurable"
                          id="ZeppelinConfigurable" displayName="Zeppelin Notebook"
                          nonDefaultProject="true"/>
+    <toolWindow id="Zeppelin"
+                secondary="true"
+                anchor="bottom"
+                canCloseContents="true"
+                factoryClass="intellij.zeppelin.ZeppelinToolWindowFactory"/>
   </extensions>
 
 

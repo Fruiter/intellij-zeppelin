@@ -14,6 +14,34 @@ abstract class ZeppelinAction extends AnAction with IdeaDocumentApi {
     ZeppelinConnection.connectionFor(anActionEvent.getProject).api
   }
 
+  def zeppelinContext(anActionEvent: AnActionEvent): Option[ZeppelinContext] = {
+    val editor = currentEditor(anActionEvent)
+    val url = findUrl(editor)
+    if (url.isEmpty) {
+      show("no url")
+      None
+    }
+
+    val credentials = findCredential(editor)
+    val proxy = findProxy(editor)
+
+    val api = new ZeppelinApi(url.get.url, credentials, proxy)
+
+    Some(ZeppelinContext(api, url.get.noteId))
+  }
+
+  def findUrl(editor: Editor): Option[Url] = {
+    precedingLines(editor).flatMap(x => Url.parse(x._2)).headOption
+  }
+
+  def findCredential(editor: Editor): Option[Credentials] = {
+    precedingLines(editor).flatMap(x => Credentials.parse(x._2)).headOption
+  }
+
+  def findProxy(editor: Editor): Option[Proxy] = {
+    precedingLines(editor).flatMap(x => Proxy.parse(x._2)).headOption
+  }
+
   def findNotebook(editor: Editor): Option[Notebook] = precedingLines(editor).flatMap(x => Notebook.parse(x._2)).headOption
 
   def findParagraph(editor: Editor): Option[Paragraph] = precedingLines(editor).flatMap(x => Paragraph.parse(x._2)).headOption
